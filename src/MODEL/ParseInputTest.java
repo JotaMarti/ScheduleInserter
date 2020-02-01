@@ -1,9 +1,6 @@
 package MODEL;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.dom.DOMSource;
-import org.w3c.dom.Document;
 import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,26 +17,8 @@ public class ParseInputTest {
 
     public ParseInputTest(String textArea) {
         this.textArea = textArea;
-        final String xmlStr = "<employees>"
-                + "   <employee id=\"101\">"
-                + "        <name>Lokesh Gupta</name>"
-                + "       <title>Author</title>"
-                + "   </employee>"
-                + "   <employee id=\"102\">"
-                + "        <name>Brian Lara</name>"
-                + "       <title>Cricketer</title>"
-                + "   </employee>"
-                + "</employees>";
-
-        //Use method to convert XML string content to XML Document object
+        
         document = convertStringToXMLDocument(this.textArea);
-
-        //Verify XML document is build correctly
-        System.out.println(document.getFirstChild().getNodeName());
-    }
-
-    public Document getDocument() {
-        return document;
     }
 
     private static Document convertStringToXMLDocument(String xmlString) {
@@ -59,6 +38,10 @@ public class ParseInputTest {
             e.printStackTrace();
         }
         return null;
+    }
+    
+        public Document getDocument() {
+        return document;
     }
 
 }

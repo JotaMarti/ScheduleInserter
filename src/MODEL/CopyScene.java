@@ -18,21 +18,23 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class ReadAndWrite {
+public class CopyScene {
 
-    private static String myInput;
+    private static String firstSceneInput;
+    private static String secondSceneInput;
 
-    public static void click(Document documentText, String input, File file) {
+    public static void click(String firstScene, String secondScene, File file) {
+        
+        firstSceneInput = firstScene;
+        secondSceneInput = secondScene;
 
         try {
-            myInput = input;
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
                     .newDocumentBuilder();
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document documentNew = docBuilder.newDocument();
             Document documentFile = dBuilder.parse(file);
-            Document documentTextArea = documentText;
 
             String root = documentFile.getDocumentElement().getNodeName();
             Element rootElement = documentNew.createElement(root);
@@ -40,7 +42,7 @@ public class ReadAndWrite {
 
             //System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
             if (documentFile.hasChildNodes()) {
-                printNote(documentFile.getChildNodes(), documentNew, rootElement, documentTextArea, myInput, file);
+                printNote(documentFile.getChildNodes(), documentNew, rootElement, file);
 
             }
 
@@ -49,7 +51,7 @@ public class ReadAndWrite {
         }
     }
 
-    private static void printNote(NodeList nodeList, Document documentNew, Element rootElement, Document documentTextArea, String input, File file) {
+    private static void printNote(NodeList nodeList, Document documentNew, Element rootElement, File file) {
 
         boolean isFinished = false;
         for (int count = 0; count < nodeList.getLength(); count++) {
@@ -61,11 +63,12 @@ public class ReadAndWrite {
                 // get node name and value
                 //System.out.println("\nNode Name =" + tempNode.getNodeName() + " [OPEN]");
                 Element element = documentNew.createElement(tempNode.getNodeName());
+                //System.out.println(tempNode.getNodeName());
                 if (tempNode.getNodeName().equals("UDConfig")) {
                     documentNew.appendChild(element);
-                } else if (tempNode.getNodeName().equals(input)) {
-                    NodeList myNodeInput = documentTextArea.getChildNodes();
-                    printNoteInput(documentNew, documentTextArea, rootElement, myNodeInput);
+                } else if (tempNode.getNodeName().equals("Scene")) {
+                    printNoteInput(documentNew, rootElement, nodeList, firstSceneInput);
+                    printNoteInput(documentNew, rootElement, nodeList, secondSceneInput);
                 } else {
                     rootElement.appendChild(element);
                 }
@@ -100,7 +103,7 @@ public class ReadAndWrite {
                 if (tempNode.hasChildNodes()) {
 
                     // loop again if has child nodes
-                    printNote(tempNode.getChildNodes(), documentNew, element, documentTextArea, input, file);
+                    printNote(tempNode.getChildNodes(), documentNew, element, file);
 
                 }
 
@@ -142,8 +145,7 @@ public class ReadAndWrite {
 
     }
 
-    private static void printNoteInput(Document documentNew, Document documentTextArea, Element rootElement, NodeList myNodeInput) {
-
+    private static void printNoteInput(Document documentNew, Element rootElement, NodeList myNodeInput, String sceneName) {
         for (int i = 0; i < myNodeInput.getLength(); i++) {
 
             Node tempNodeInput = myNodeInput.item(i);
@@ -156,10 +158,21 @@ public class ReadAndWrite {
                     NamedNodeMap nodeMapInput = tempNodeInput.getAttributes();
 
                     for (int j = 0; j < nodeMapInput.getLength(); j++) {
-                        Node nodeInput = nodeMapInput.item(j);
-                        Attr attrInput = documentNew.createAttribute(nodeInput.getNodeName());
-                        attrInput.setValue(nodeInput.getNodeValue());
-                        elementTextArea.setAttributeNode(attrInput);
+
+                        Node node = nodeMapInput.item(j);
+                        //System.out.println(nodeMapInput.item(j));
+                        //System.out.println(tempNodeInput.getNodeName());
+                        //System.out.println(rootElement.getTagName().equals("Scene") + " SCENE");
+                        if (node.getNodeName().equals("Name") && tempNodeInput.getNodeName().equals("Scene")) {
+                            Attr attr = documentNew.createAttribute(node.getNodeName());
+                            attr.setValue(sceneName);
+                            elementTextArea.setAttributeNode(attr);
+                        } else {
+                            Attr attr = documentNew.createAttribute(node.getNodeName());
+                            attr.setValue(node.getNodeValue());
+                            elementTextArea.setAttributeNode(attr);
+                        }
+
                         //System.out.println("attr name : " + nodeInput.getNodeName());
                         //System.out.println("attr value : " + nodeInput.getNodeValue());
                     }
@@ -169,78 +182,12 @@ public class ReadAndWrite {
                 if (tempNodeInput.hasChildNodes()) {
 
                     // loop again if has child nodes
-                    //printNote1(tempNodeInput.getChildNodes(), documentNew, elementTextArea, documentTextArea);
-                    printNoteInput(documentNew, documentTextArea, elementTextArea, tempNodeInput.getChildNodes());
+                    printNoteInput(documentNew, elementTextArea, tempNodeInput.getChildNodes(), sceneName);
                 }
             }
 
         }
     }
-    
-    
-    
-    
-    
 
-    private static void printNote1(NodeList nodeList2, Document document, Element rootElement, Document documentTextArea) {
-
-        for (int i = 0; i < nodeList2.getLength(); i++) {
-
-            Node tempNode2 = nodeList2.item(i);
-
-            // make sure it's element node.
-            if (tempNode2.getNodeType() == Node.ELEMENT_NODE) {
-
-                // get node name and value
-                //System.out.println("\nNode Name =" + tempNode.getNodeName() + " [OPEN]");
-                Element staff2 = document.createElement(tempNode2.getNodeName());
-                if (tempNode2.getNodeName().equals("UDConfig")) {
-                    document.appendChild(staff2);
-                } else {
-                    rootElement.appendChild(staff2);
-                }
-
-                //System.out.println("Node Value =" + tempNode.getTextContent());
-                if (tempNode2.hasAttributes()) {
-
-                    // get attributes names and values
-                    NamedNodeMap nodeMap2 = tempNode2.getAttributes();
-
-                    for (int j = 0; j < nodeMap2.getLength(); j++) {
-                        /*Node node = nodeMap.item(i);
-                        if (node.getNodeName().equals("IP")) {
-                            
-                            Attr attr = document.createAttribute(node.getNodeName());
-                            attr.setValue("10.10.10.10");
-                            staff.setAttributeNode(attr);
-                        } else {
-                            
-                            Attr attr = document.createAttribute(node.getNodeName());
-                            attr.setValue(node.getNodeValue());
-                            staff.setAttributeNode(attr);
-                        }*/
-                        Node node2 = nodeMap2.item(j);
-                        Attr attr2 = document.createAttribute(node2.getNodeName());
-                        attr2.setValue(node2.getNodeValue());
-                        staff2.setAttributeNode(attr2);
-                        //System.out.println("attr name : " + node2.getNodeName());
-                        //System.out.println("attr value : " + node2.getNodeValue());
-                    }
-
-                }
-
-                if (tempNode2.hasChildNodes()) {
-
-                    // loop again if has child nodes
-                    printNote1(tempNode2.getChildNodes(), document, staff2, documentTextArea);
-
-                }
-
-                //System.out.println("Node Name =" + tempNode.getNodeName() + " [CLOSE]");
-            }
-
-        }
-
-    }
 
 }
